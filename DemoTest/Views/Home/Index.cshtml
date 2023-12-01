@@ -1,0 +1,93 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+<script src="~/Scripts/jquery-3.4.1.js"></script>
+<script>
+    function selecttable() {
+        $.ajax({
+            url: '/home/SelectCountry',
+            type: 'POST',
+            success: function (res) {
+                //alert(res);
+                $("#tbl tbody").empty();
+                $.each(res, function (index, e) {
+                    $("#tbl").append("<tr><td>" + e.country_id + "</td><td>" + e.country_name + "</td><td><i class='btn btn-success' onclick='getuserrecord(" + e.country_id + ")'>Edit</i></td><td><i class='btn btn-danger fw-bold' onclick='deleterecord(" +e.country_id + ")'>DELETE</i></td></tr>");
+                })
+            }
+        })
+    }
+    function getuserrecord(sr) {
+        $.ajax({
+            url: '/Home/editcountryrecord',
+            type: 'POST',
+            data: { 'sr': sr},
+            dataType: 'json',
+            success: function (re) {
+                //alert(re)
+                $("#country_id").val(re.country_id);
+                $("#country_name").val(re.country_name);
+                $("#btnadd").val("Update Now");
+            }
+        })
+    }
+    function deleterecord(sr) {
+        $.ajax({
+            url: '/home/RecordDeleted',
+            type: 'POST',
+            data: { 'sr': sr },
+            dataType: 'Json',
+            success: function (res) {
+                //alert(res)
+                selectrecord();
+            },
+            error: function () {
+                alert('record not deleted')
+            }
+        })
+    }
+    $(document).ready(function () {
+        selecttable();
+        $("#btnadd").click(function () {
+            //alert('ok')
+            var data = $("#form1").serializeArray();
+            $.ajax({
+                url: '/home/Index',
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                success: function (result) {
+                    //alert(result)
+                    selecttable();
+                    document.getElementById("form1").reset();
+
+                }
+            })
+        })
+    });
+</script>
+<h2>Country</h2>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6">
+            <form id="form1">
+                <input type="text" hidden name="country_id" id="country_id" readonly class="form-control" /><br />
+                Country Name:
+                <input type="text" name="country_name" id="country_name" class="form-control" /><br />
+                <input type="button" id="btnadd" value="Add Country" class="btn btn-danger" />
+            </form>
+        </div>
+        <div class="col-sm-6">
+            <table id="tbl" class="table table-bordered text-center" border="5px">
+                <thead>
+                    <tr>
+                        <th>Sr</th>
+                        <th>Country Name</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>

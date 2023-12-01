@@ -1,0 +1,107 @@
+﻿
+@{
+    ViewBag.Title = "State";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/jquery-3.4.1.js"></script>
+<script>
+    function selecttable() {
+        $.ajax({
+            url: '/home/SelectState',
+            type: 'POST',
+            success: function (res) {
+                //alert(res);
+                $("#tbl tbody").empty();
+                $.each(res, function (index, e) {
+                    $("#tbl").append("<tr><td>" + e.state_id + "</td><td>" + e.country_name + "</td><td>" + e.state_name + "</td><td><i class='btn btn-success' onclick='getuserrecord(" + e.state_id + ")'>Edit</i></td><td><i class='btn btn-danger fw-bold' onclick='deleterecord(" + e.state_id + ")'>DELETE</i></td></tr>");
+                })
+            }
+        })
+    }
+    function getuserrecord(sr) {
+        $.ajax({
+            url: '/Home/editstaterecord',
+            type: 'POST',
+            data: { 'sr': sr },
+            dataType: 'json',
+            success: function (re) {
+                //alert(re)
+                $("#state_id").val(re.state_id);
+                $("#state_name").val(re.state_name);
+                $("#country_name").val(re.country_id);
+                $("#btnadd").val("Update Now");
+            }
+        })
+    }
+    function deleterecord(sr) {
+        $.ajax({
+            url: '/home/StateDeleted',
+            type: 'POST',
+            data: { 'sr': sr },
+            dataType: 'Json',
+            success: function (res) {
+                //alert(res)
+                selecttable();
+            },
+            error: function () {
+                alert('record not deleted')
+            }
+        })
+    }
+    $(document).ready(function () {
+        selecttable();
+        $("#btnadd").click(function () {
+            //alert('ok')
+            var data = $("#form2").serializeArray();
+            $.ajax({
+                url: '/home/addstate',
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                success: function (result) {
+                    //alert(result)
+                    //selecttable();
+                    document.getElementById("form2").reset();
+                }
+            })
+        })
+    });
+</script>
+<h2>State</h2>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6">
+            <form id="form2">
+                <input type="text" hidden name="state_id" id="state_id" readonly class="form-control" /><br />
+                Country Name:
+                <select name="country_name" id="country_name" class="form-control">
+                    <option>-- Select Country --</option>
+                    @if (ViewBag.data.Rows.Count > 0)
+                    {
+                        foreach (var row in ViewBag.data.Rows)
+                        {
+                            <option value="@row["country_id"]">@row["country_name"]</option>
+                        }
+                    }
+                </select>
+                State Name:
+                <input type="text" name="state_name" id="state_name" class="form-control" /><br />
+                <input type="button" id="btnadd" value="Add State" class="btn btn-danger" />
+            </form>
+        </div>
+        <div class="col-sm-6">
+            <table id="tbl" class="table table-bordered text-center" border="5px">
+                <thead>
+                    <tr>
+                        <th>Sr</th>
+                        <th>Country Name</th>
+                        <th>State Name</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
